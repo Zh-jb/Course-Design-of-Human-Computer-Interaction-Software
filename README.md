@@ -7,3 +7,7 @@ Environment: Pycharm-2026.3.2.1  Python-3.13
 
 Week 2 Task: (2026-3-11)
 Use functions and moudles to complete get basic information of a text like how to split,statistics and other works.
+
+Week 3 Task：(2026-3-18)
+Complete complex file operation and properly address exception.
+The support batch update from one file to more files existed in one fileholder.
