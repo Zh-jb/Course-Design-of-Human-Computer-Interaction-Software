@@ -1,0 +1,18 @@
+{"id": "example.md_1", "doc": "example.md", "pid": 1, "text": "Python 是一种解释型语言。", "char_length": 16, "doc_id": "example"}
+{"id": "example.md_2", "doc": "example.md", "pid": 2, "text": "它的语法简洁、易学，非常适合初学者。", "char_length": 18, "doc_id": "example"}
+{"id": "example.md_3", "doc": "example.md", "pid": 3, "text": "列表（list）和字典（dict）是最常用的数据容器。", "char_length": 27, "doc_id": "example"}
+{"id": "example.md_4", "doc": "example.md", "pid": 4, "text": "掌握基本的控制结构：if/elif/else, for循环，对后续编程非常重要。", "char_length": 40, "doc_id": "example"}
+{"id": "example.md_5", "doc": "example.md", "pid": 5, "text": "函数是 Python 的重要组成部分，通过函数可以封装代码，提高程序的复用性和可读性。", "char_length": 43, "doc_id": "example"}
+{"id": "example.md_6", "doc": "example.md", "pid": 6, "text": "在学习 Python 的过程中，编写小程序练习逻辑思维和问题解决能力非常关键，例如计算数列和处理文本数据等。", "char_length": 54, "doc_id": "example"}
+{"id": "example2.md_1", "doc": "example2.md", "pid": 1, "text": "Java 是一种编译型语言。", "char_length": 14, "doc_id": "example2"}
+{"id": "example2.md_2", "doc": "example2.md", "pid": 2, "text": "它的语法严谨、面向对象，是企业级开发的常用语言。", "char_length": 24, "doc_id": "example2"}
+{"id": "example2.md_3", "doc": "example2.md", "pid": 3, "text": "数组（array）和集合（collection）是最常用的数据容器。", "char_length": 34, "doc_id": "example2"}
+{"id": "example2.md_4", "doc": "example2.md", "pid": 4, "text": "掌握基本的控制结构：if/else, for/while循环，对后续编程非常重要。", "char_length": 41, "doc_id": "example2"}
+{"id": "example2.md_5", "doc": "example2.md", "pid": 5, "text": "类和方法是 Java 的重要组成部分，通过类和方法可以封装代码，提高程序的复用性和可读性。", "char_length": 45, "doc_id": "example2"}
+{"id": "example2.md_6", "doc": "example2.md", "pid": 6, "text": "在学习 Java 的过程中，编写小程序练习逻辑思维和问题解决能力非常关键，例如计算算法复杂度和处理数据库数据等。", "char_length": 56, "doc_id": "example2"}
+{"id": "example3.md_1", "doc": "example3.md", "pid": 1, "text": "JavaScript 是一种脚本型语言。", "char_length": 20, "doc_id": "example3"}
+{"id": "example3.md_2", "doc": "example3.md", "pid": 2, "text": "它的语法灵活、弱类型，非常适合前端开发场景。", "char_length": 22, "doc_id": "example3"}
+{"id": "example3.md_3", "doc": "example3.md", "pid": 3, "text": "数组（Array）和对象（Object）是最常用的数据容器。", "char_length": 30, "doc_id": "example3"}
+{"id": "example3.md_4", "doc": "example3.md", "pid": 4, "text": "掌握基本的控制结构：if/else, for/forEach循环，对后续编程非常重要。", "char_length": 43, "doc_id": "example3"}
+{"id": "example3.md_5", "doc": "example3.md", "pid": 5, "text": "函数是 JavaScript 的重要组成部分，通过函数（尤其是箭头函数）可以封装代码，提高程序的复用性和可读性。", "char_length": 56, "doc_id": "example3"}
+{"id": "example3.md_6", "doc": "example3.md", "pid": 6, "text": "在学习 JavaScript 的过程中，编写小程序练习逻辑思维和问题解决能力非常关键，例如处理DOM元素和实现异步请求等。", "char_length": 61, "doc_id": "example3"}

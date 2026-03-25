@@ -1,7 +1,7 @@
 # Course-Design-of-Human-Computer-Interaction-Software
 A CourseQA system base on Python. The update cycle will continue to 2026.05 until the course is finished
 
-Week 1 Task:  (2026-3-8)
+Week 1 Task: (2026-3-8)
 Complete the environment setup and implement the reading of markdown files.
 Environment: Pycharm-2026.3.2.1  Python-3.13
 
@@ -11,3 +11,6 @@ Use functions and moudles to complete get basic information of a text like how t
 Week 3 Task：(2026-3-18)
 Complete complex file operation and properly address exception.
 The support batch update from one file to more files existed in one fileholder.
+
+Week 4 Task: (2026-3-25)
+Learn to use json/jsonl to complete file's quick read and write . Clarify the type transformation between Python and json(json.dumps(),json.loads()).
