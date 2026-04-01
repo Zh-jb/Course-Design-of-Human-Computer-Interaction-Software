@@ -1,5 +1,6 @@
 # Course-Design-of-Human-Computer-Interaction-Software
-A CourseQA system base on Python. The update cycle will continue to 2026.05 until the course is finished
+A CourseQA system base on Python. The update cycle will continue to 2026.05 until the course is finished.
+The teacher is Yang,Lu.
 
 Week 1 Task: (2026-3-8)
 Complete the environment setup and implement the reading of markdown files.
@@ -14,3 +15,6 @@ The support batch update from one file to more files existed in one fileholder.
 
 Week 4 Task: (2026-3-25)
 Learn to use json/jsonl to complete file's quick read and write . Clarify the type transformation between Python and json(json.dumps(),json.loads()).
+
+Week 5 Task: (2026-4-1)
+Complete the single/multiple file query, use the count method to statistically calculate the word frequency and output the Top-N results in order.

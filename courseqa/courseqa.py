@@ -82,7 +82,6 @@ def write_stats_report(stats_dict, file_path, report_path):
         print(f"【错误】写入报告失败：{e}")
         return False
 
-# ====================== 实践4 基础任务 ======================
 def build_chunks(doc_name, paragraphs):
     chunks = []
     for pid, text in enumerate(paragraphs, start=1):
@@ -107,8 +106,6 @@ def write_chunks_jsonl(chunks, jsonl_path):
     except Exception as e:
         print(f"【写入jsonl失败】{e}")
         return False
-
-# ====================== 实践4 升级任务 全部完成 ======================
 
 def read_chunks_jsonl(jsonl_path):
     """升级任务1：从jsonl读取chunks"""
@@ -184,8 +181,6 @@ def print_chunk_summary(chunks):
         print(json.dumps(chunks[0], ensure_ascii=False, indent=2))
     print("=========================\n")
 
-# ====================== 升级任务结束 ======================
-
 def get_user_input(default_md, default_para, default_report):
     print("===== 路径设置（回车默认） =====")
     md_path = input(f"MD路径：").strip() or default_md
@@ -226,6 +221,48 @@ def batch_process_md(folder_path="data/md"):
     merge_all_chunks(folder_path)
     print("[批量处理完成] all_chunks.jsonl 已生成")
 
+def search_count(query,chunks,top_k=5):
+    query = query.strip()
+    if not query:
+        print("查询不可为空！")
+        return []
+    
+    if(top_k <=0):
+        top_k = 5
+
+    results = []
+    for chunk in chunks:
+        text = chunk['text']
+        score = text.lower().count(query.lower())
+        if score>0:
+            results.append({
+                'score': score,
+                'doc' : chunk['doc'],
+                'pid' : chunk['pid'],
+                'text': chunk['text']
+            })
+    results.sort(key = lambda x:x['score'],reverse = True)
+    return results[:top_k]
+
+def print_search_results(results):
+    for i, item in enumerate(results, start=1):
+        print(f"[Top{i}]分数:{item['score']}|来源{item['doc']}第{item['pid']}段]")
+        print(item['text'][:6]+"...(其余内容请打开源文件查看)")
+        print('-'*60)
+
+def search_count_multiple_docs(query,md_folder,top_k=5):
+    all_chunks = []
+    md_files = glob.glob(os.path.join(md_folder, "**/*.md"), recursive=True)
+    for file in md_files:
+        content = read_md_file(file)
+        if not content:
+            continue
+        paras = split_paragraphs(content)
+        doc_name = os.path.basename(file)
+        chunks = build_chunks_with_fields(doc_name, paras)
+        all_chunks.extend(chunks)
+    return search_count(query, all_chunks, top_k)
+
 def main():
     DEFAULT_MD = "data/md/example.md"
     DEFAULT_PARA = "output/paras.txt"
@@ -234,13 +271,57 @@ def main():
     print("===== MD分块导出工具 =====")
     print("1 - 单文件处理（输出jsonl + json）")
     print("2 - 批量处理 + 合并所有文件为一个jsonl")
-    choice = input("请选择（1/2，默认1）：").strip() or "1"
+    print("3 - 查询关键字-在example.md中查找并输出top5结果")
+    print("4 - 在指定路径下多文档中查询关键字并输出top结果")
+    print("5 - 退出程序")
+    choice = input("请选择（1/2/3/4，默认1）：").strip() or "1"
 
     if choice == "1":
         md_path, para_path, report_path = get_user_input(DEFAULT_MD, DEFAULT_PARA, DEFAULT_REPORT)
         process_single_md(md_path, para_path, report_path)
     elif choice == "2":
         batch_process_md()
+    elif choice == "3":
+        query = input("请输入查询关键字：").strip()
+        if not query:
+            print("查询关键字不可为空！")
+            return
+        chunks = build_chunks_with_fields(DEFAULT_MD, split_paragraphs(read_md_file(DEFAULT_MD)))
+        results = search_count(query, chunks)
+        print_search_results(results)
+        print("您是否需要继续查询？如需查询，请输入新的关键词，否则请输入exit退出")
+        while True:
+            user_input = input("请输入新的关键词或exit退出:").strip().lower()
+            if user_input == "exit":
+                print("查询结束，退出程序")
+                break
+            elif not user_input:
+                print("输入为空，请重新输入")
+            else:
+                results = search_count(user_input, chunks)
+                print_search_results(results)
+    elif choice == "4":
+        md_folder = input("请输入MD文件夹路径（默认data/md）：").strip() or "data/md"
+        query = input("请输入查询关键字：").strip()
+        if not query:
+            print("查询关键字不可为空！")
+            return
+        results = search_count_multiple_docs(query,md_folder)
+        print_search_results(results)
+        print("您是否需要继续查询？如需查询，请输入新的关键词，否则请输入exit退出")
+        while True:
+            user_input = input("请输入新的关键词或exit退出:").strip().lower()
+            if user_input == "exit":
+                print("查询结束，退出程序")
+                break
+            elif not user_input:
+                print("输入为空，请重新输入")
+            else:
+                results = search_count_multiple_docs(user_input, md_folder)
+                print_search_results(results)
+    elif choice == "5":
+        print("退出程序")
+        return
     else:
         print("输入错误，使用默认单文件处理")
         process_single_md(DEFAULT_MD, DEFAULT_PARA, DEFAULT_REPORT)

@@ -3,8 +3,8 @@
     "id": "example.md_1",
     "doc": "example.md",
     "pid": 1,
-    "text": "Python 是一种解释型语言。",
-    "char_length": 16,
+    "text": "Python 是一种解释型语言。python,pYthon,PYTHON,pyTHON.",
+    "char_length": 44,
     "doc_id": "example"
   },
   {
@@ -35,8 +35,8 @@
     "id": "example.md_5",
     "doc": "example.md",
     "pid": 5,
-    "text": "函数是 Python 的重要组成部分，通过函数可以封装代码，提高程序的复用性和可读性。",
-    "char_length": 43,
+    "text": "函数是 Python 的重要组成部分，通过函数可以封装代码，提高程序的复用性和可读性。PYTHON",
+    "char_length": 49,
     "doc_id": "example"
   },
   {
