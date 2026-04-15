@@ -1,280 +1,41 @@
 import os
-import glob
-import json
+from courseqa_core import(read_md_file,split_paragraphs,build_chunks_with_fields,process_single_md,batch_process_md,search_count,print_search_results,search_count_multiple_docs,build_tfidf,search_tfidf,build_bm25,search_bm25)
 
-def read_md_file(file_path):
-    try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            content = file.read()
-        return content
-    except FileNotFoundError:
-        print(f"【错误】文件不存在：{file_path}")
-        return None
-    except PermissionError:
-        print(f"【错误】无权限读取文件：{file_path}")
-        return None
-    except Exception as e:
-        print(f"【错误】读取文件 {file_path} 失败：{str(e)}")
-        return None
-
-def split_paragraphs(text):
-    if not text or text.strip() == "":
-        return []
-    raw_paragraphs = text.split("\n\n")
-    paragraphs = [p.strip() for p in raw_paragraphs if p.strip()]
-    return paragraphs
-
-def get_paragraph_stats(paragraphs, raw_content):
-    num_paragraphs = len(paragraphs)
-    longest_length = max((len(p) for p in paragraphs), default=0)
-    shortest_length = min((len(p) for p in paragraphs), default=0)
-    total_char = len(raw_content.replace("\n", "").replace(" ", ""))
-    avg_length = round(total_char / num_paragraphs, 2) if num_paragraphs > 0 else 0
-    return {
-        "num_paras": num_paragraphs,
-        "longest_len": longest_length,
-        "shortest_len": shortest_length,
-        "total_char": total_char,
-        "avg_len": avg_length
-    }
-
-def write_formatted_paras(paragraphs, output_path):
-    try:
-        output_dir = os.path.dirname(output_path)
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
-            for i, para in enumerate(paragraphs, 1):
-                para_len = len(para)
-                f.write(f"段落 {i}\n")
-                f.write(f"长度：{para_len}\n")
-                f.write(f"内容：\n{para}\n")
-                f.write("-" * 50 + "\n\n")
-        return True
-    except PermissionError:
-        print(f"【错误】无权限写入文件：{output_path}")
-        return False
-    except Exception as e:
-        print(f"【错误】写入段落文件 {output_path} 失败：{str(e)}")
-        return False
-
-def write_stats_report(stats_dict, file_path, report_path):
-    try:
-        output_dir = os.path.dirname(report_path)
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-        with open(report_path, 'w', encoding='utf-8') as f:
-            f.write("=" * 60 + "\n")
-            f.write("Markdown文件段落统计报告\n")
-            f.write("=" * 60 + "\n")
-            f.write(f"原始文件路径：{os.path.abspath(file_path)}\n")
-            f.write(f"文件纯内容总字符数：{stats_dict['total_char']}\n")
-            f.write(f"有效段落总数：{stats_dict['num_paras']}\n")
-            f.write(f"最长段落字符数：{stats_dict['longest_len']}\n")
-            f.write(f"最短段落字符数：{stats_dict['shortest_len']}\n")
-            f.write(f"平均段落字符数：{stats_dict['avg_len']}\n")
-            f.write("=" * 60 + "\n")
-        return True
-    except PermissionError:
-        print(f"【错误】写入报告：{report_path} 失败")
-        return False
-    except Exception as e:
-        print(f"【错误】写入报告失败：{e}")
-        return False
-
-def build_chunks(doc_name, paragraphs):
-    chunks = []
-    for pid, text in enumerate(paragraphs, start=1):
-        chunk = {
-            "doc": doc_name,
-            "pid": pid,
-            "text": text
-        }
-        chunks.append(chunk)
-    return chunks
-
-def write_chunks_jsonl(chunks, jsonl_path):
-    try:
-        output_dir = os.path.dirname(jsonl_path)
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-        with open(jsonl_path, 'w', encoding='utf-8') as f:
-            for chunk in chunks:
-                line = json.dumps(chunk, ensure_ascii=False)
-                f.write(line + "\n")
-        return True
-    except Exception as e:
-        print(f"【写入jsonl失败】{e}")
-        return False
-
-def read_chunks_jsonl(jsonl_path):
-    """升级任务1：从jsonl读取chunks"""
-    chunks = []
-    try:
-        with open(jsonl_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    chunk = json.loads(line)
-                    chunks.append(chunk)
-        return chunks
-    except Exception as e:
-        print(f"【读取jsonl失败】{e}")
-        return []
-
-def build_chunks_with_fields(doc_name, paragraphs):
-    """升级任务2：增加额外字段：id、char_length、doc_id"""
-    chunks = []
-    for pid, text in enumerate(paragraphs, start=1):
-        chunk = {
-            "id": f"{doc_name}_{pid}",
-            "doc": doc_name,
-            "pid": pid,
-            "text": text,
-            "char_length": len(text),
-            "doc_id": doc_name.split(".")[0]
-        }
-        chunks.append(chunk)
-    return chunks
-
-def write_chunks_json(chunks, json_path):
-    """升级任务3：写入普通json数组文件"""
-    try:
-        output_dir = os.path.dirname(json_path)
-        if output_dir:
-            os.makedirs(output_dir, exist_ok=True)
-        with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(chunks, f, ensure_ascii=False, indent=2)
-        return True
-    except Exception as e:
-        print(f"【写入普通json失败】{e}")
-        return False
-
-def merge_all_chunks(md_folder, output_jsonl="output/all_chunks.jsonl"):
-    """升级任务4：批量处理所有md并合并为一个jsonl"""
-    all_chunks = []
-    md_files = glob.glob(os.path.join(md_folder, "**/*.md"), recursive=True)
-    for file in md_files:
-        content = read_md_file(file)
-        if not content:
-            continue
-        paras = split_paragraphs(content)
-        doc_name = os.path.basename(file)
-        chunks = build_chunks_with_fields(doc_name, paras)
-        all_chunks.extend(chunks)
-
-    with open(output_jsonl, 'w', encoding='utf-8') as f:
-        for c in all_chunks:
-            f.write(json.dumps(c, ensure_ascii=False) + "\n")
-    print(f"[合并完成] 共 {len(all_chunks)} 个chunk → {output_jsonl}")
-    return all_chunks
-
-def print_chunk_summary(chunks):
-    """升级任务5：输出摘要信息"""
-    print("\n===== Chunk 摘要信息 =====")
-    print(f"总条目数：{len(chunks)}")
-    if chunks:
-        docs = list(set([c["doc"] for c in chunks]))
-        print(f"文档数量：{len(docs)}")
-        print(f"文档列表：{docs}")
-        print(f"单条结构示例：")
-        print(json.dumps(chunks[0], ensure_ascii=False, indent=2))
-    print("=========================\n")
-
-def get_user_input(default_md, default_para, default_report):
-    print("===== 路径设置（回车默认） =====")
-    md_path = input(f"MD路径：").strip() or default_md
-    para_path = input(f"段落输出：").strip() or default_para
-    report_path = input(f"报告路径：").strip() or default_report
-    return md_path, para_path, report_path
-
-def process_single_md(md_path, para_output, report_output):
-    print(f"\n===== 处理文件：{md_path} =====")
-    raw_content = read_md_file(md_path)
-    if raw_content is None:
-        return False
-
-    paragraphs = split_paragraphs(raw_content)
-    if not paragraphs:
-        print("无有效段落")
-        return True
-
-    stats = get_paragraph_stats(paragraphs, raw_content)
-    print(f"有效段落：{stats['num_paras']} | 总字符：{stats['total_char']}")
-
-    doc_name = os.path.basename(md_path)
-    
-    # 升级：带扩展字段的chunk
-    chunks = build_chunks_with_fields(doc_name, paragraphs)
-    
-    write_formatted_paras(paragraphs, para_output)
-    write_stats_report(stats, md_path, report_output)
-    write_chunks_jsonl(chunks, "output/chunks.jsonl")
-    write_chunks_json(chunks, "output/chunks.json")
-
-    # 输出摘要
-    print_chunk_summary(chunks)
-    print("[单文件处理完成] output/ 下已生成 jsonl + json")
-
-def batch_process_md(folder_path="data/md"):
-    print("\n===== 批量处理 + 全部合并 =====")
-    merge_all_chunks(folder_path)
-    print("[批量处理完成] all_chunks.jsonl 已生成")
-
-def search_count(query,chunks,top_k=5):
-    query = query.strip()
-    if not query:
-        print("查询不可为空！")
-        return []
-    
-    if(top_k <=0):
-        top_k = 5
-
-    results = []
-    for chunk in chunks:
-        text = chunk['text']
-        score = text.lower().count(query.lower())
-        if score>0:
-            results.append({
-                'score': score,
-                'doc' : chunk['doc'],
-                'pid' : chunk['pid'],
-                'text': chunk['text']
-            })
-    results.sort(key = lambda x:x['score'],reverse = True)
-    return results[:top_k]
-
-def print_search_results(results):
-    for i, item in enumerate(results, start=1):
-        print(f"[Top{i}]分数:{item['score']}|来源{item['doc']}第{item['pid']}段]")
-        print(item['text'][:6]+"...(其余内容请打开源文件查看)")
-        print('-'*60)
-
-def search_count_multiple_docs(query,md_folder,top_k=5):
-    all_chunks = []
-    md_files = glob.glob(os.path.join(md_folder, "**/*.md"), recursive=True)
-    for file in md_files:
-        content = read_md_file(file)
-        if not content:
-            continue
-        paras = split_paragraphs(content)
-        doc_name = os.path.basename(file)
-        chunks = build_chunks_with_fields(doc_name, paras)
-        all_chunks.extend(chunks)
-    return search_count(query, all_chunks, top_k)
+def get_valid_integer_input(prompt, default, min_val=1):
+    """通用整数输入验证函数"""
+    while True:
+        try:
+            user_input = input(prompt).strip()
+            if not user_input:  # 空输入使用默认值
+                return default
+            val = int(user_input)
+            if val < min_val:
+                print(f"输入值需大于等于{min_val}，将使用默认值 {default}")
+                return default
+            return val
+        except ValueError:
+            print(f"输入不是有效整数，将使用默认值 {default}")
+            return default
 
 def main():
     DEFAULT_MD = "data/md/example.md"
     DEFAULT_PARA = "output/paras.txt"
     DEFAULT_REPORT = "output/report.txt"
+    
+    # 交互式设置top_k和preview_chars
+    print("===== 参数设置 =====")
+    top_k = get_valid_integer_input(f"请输入返回结果数量top_k（默认5）：", 5, 1)
+    preview_chars = get_valid_integer_input(f"请输入预览字符数preview_chars（默认50）：", 50, 1)
+    print("="*50 + "\n")
 
     print("===== MD分块导出工具 =====")
     print("1 - 单文件处理（输出jsonl + json）")
     print("2 - 批量处理 + 合并所有文件为一个jsonl")
-    print("3 - 查询关键字-在example.md中查找并输出top5结果")
-    print("4 - 在指定路径下多文档中查询关键字并输出top结果")
-    print("5 - 退出程序")
-    choice = input("请选择（1/2/3/4，默认1）：").strip() or "1"
+    print("3 - 查询关键字-在example.md中查找并输出top{}结果".format(top_k))
+    print("4 - 在指定路径下多文档中查询关键字并输出top{}结果".format(top_k))
+    print("5 - 比较不同检索方法的查询结果".format(top_k))
+    print("6 - 退出程序")
+    choice = input("请选择（1/2/3/4/5/6，默认1）：").strip() or "1"
 
     if choice == "1":
         md_path, para_path, report_path = get_user_input(DEFAULT_MD, DEFAULT_PARA, DEFAULT_REPORT)
@@ -286,45 +47,88 @@ def main():
         if not query:
             print("查询关键字不可为空！")
             return
-        chunks = build_chunks_with_fields(DEFAULT_MD, split_paragraphs(read_md_file(DEFAULT_MD)))
-        results = search_count(query, chunks)
-        print_search_results(results)
-        print("您是否需要继续查询？如需查询，请输入新的关键词，否则请输入exit退出")
+        chunks = build_chunks_with_fields(os.path.basename(DEFAULT_MD), split_paragraphs(read_md_file(DEFAULT_MD)))
+        results = search_count(query, chunks, top_k)
+        # 重写打印函数，使用自定义preview_chars
+        print_search_results_custom(results, preview_chars)
         while True:
-            user_input = input("请输入新的关键词或exit退出:").strip().lower()
-            if user_input == "exit":
-                print("查询结束，退出程序")
+            user_input = input("新关键词（exit退出）：").strip()
+            if user_input.lower() == "exit":
+                print("结束查询")
                 break
-            elif not user_input:
-                print("输入为空，请重新输入")
-            else:
-                results = search_count(user_input, chunks)
-                print_search_results(results)
+            results = search_count(user_input, chunks, top_k)
+            print_search_results_custom(results, preview_chars)
     elif choice == "4":
-        md_folder = input("请输入MD文件夹路径（默认data/md）：").strip() or "data/md"
+        md_folder = input("MD文件夹（默认data/md）：").strip() or "data/md"
+        query = input("查询关键词：").strip()
+        if not query:
+            print("关键词不能为空")
+            return
+        results = search_count_multiple_docs(query, md_folder, top_k)
+        print_search_results_custom(results, preview_chars)
+    elif choice == "5":
         query = input("请输入查询关键字：").strip()
         if not query:
-            print("查询关键字不可为空！")
+            print("不能为空！")
             return
-        results = search_count_multiple_docs(query,md_folder)
-        print_search_results(results)
-        print("您是否需要继续查询？如需查询，请输入新的关键词，否则请输入exit退出")
-        while True:
-            user_input = input("请输入新的关键词或exit退出:").strip().lower()
-            if user_input == "exit":
-                print("查询结束，退出程序")
-                break
-            elif not user_input:
-                print("输入为空，请重新输入")
-            else:
-                results = search_count_multiple_docs(user_input, md_folder)
-                print_search_results(results)
-    elif choice == "5":
+
+        # 让用户选择查看方式
+        print("\n===== 选择查看方式 =====")
+        view_choice = input("请选择查看方式（count/tfidf/both，默认both）：").strip().lower() or "both"
+        while view_choice not in ["count", "tfidf", "both"]:
+            print("输入错误！仅支持 count/tfidf/both")
+            view_choice = input("请重新选择（count/tfidf/both，默认both）：").strip().lower() or "both"
+
+        content = read_md_file(DEFAULT_MD)
+        paras = split_paragraphs(content)
+        doc_name = os.path.basename(DEFAULT_MD)
+        chunks = build_chunks_with_fields(doc_name, paras)
+
+        # 根据选择展示结果
+        if view_choice in ["count", "both"]:
+            print("\n===== COUNT 检索结果 =====")
+            res_count = search_count(query, chunks, top_k)
+            print_search_results_custom(res_count, preview_chars)
+
+        if view_choice in ["tfidf", "both"]:
+            print("\n===== TF-IDF 检索结果 =====")
+            texts = [c["text"] for c in chunks]
+            vectorizer, text_vectors = build_tfidf(texts)
+            res_tfidf = search_tfidf(query, vectorizer, text_vectors, chunks, top_k)
+            print_search_results_custom(res_tfidf, preview_chars)
+
+        if view_choice == "both":  # both时额外展示BM25
+            print("\n===== BM25 方法检索结果 =====")
+            bm25_model = build_bm25(chunks)
+            res_bm25 = search_bm25(query, bm25_model, chunks, top_k)
+            print_search_results_custom(res_bm25, preview_chars)
+
+    elif choice == "6":
         print("退出程序")
         return
     else:
         print("输入错误，使用默认单文件处理")
         process_single_md(DEFAULT_MD, DEFAULT_PARA, DEFAULT_REPORT)
 
+def print_search_results_custom(results, preview_chars):
+    """自定义预览字符数的结果打印函数"""
+    if not results:
+        print("⚠️ 未找到任何匹配结果")
+        return
+    for i, item in enumerate(results, start=1):
+        print(f"[Top{i}] 分数:{item['score']:.4f} | 来源:{item['doc']} 第{item['pid']}段")
+        preview_text = item['text'][:preview_chars] + ("..." if len(item['text']) > preview_chars else "")
+        print("内容：" + preview_text)
+        print('-'*60)
+
+def get_user_input(default_md, default_para, default_report):
+    print("===== 路径设置（回车默认） =====")
+    md_path = input(f"MD路径：").strip() or default_md
+    para_path = input(f"段落输出：").strip() or default_para
+    report_path = input(f"报告路径：").strip() or default_report
+    return md_path, para_path, report_path
+
 if __name__ == '__main__':
+    os.makedirs("data/md", exist_ok=True)
+    os.makedirs("output", exist_ok=True)
     main()
