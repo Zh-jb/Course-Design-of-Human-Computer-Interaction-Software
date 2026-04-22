@@ -18,3 +18,9 @@ Learn to use json/jsonl to complete file's quick read and write . Clarify the ty
 
 Week 5 Task: (2026-4-1)
 Complete the single/multiple file query, use the count method to statistically calculate the word frequency and output the Top-N results in order.
+
+Week 6 & 7 Task: (2026-4-8，2026-4-15):
+Use Count ,TF-IDF and BM-25 methods to achieve simple text retrieval.
+
+Week 8 Task:(2026-4-22):
+Learn to basically use FastAPI and uvicorn order.Tried to add some different URL path(Some of them contains Parameters).

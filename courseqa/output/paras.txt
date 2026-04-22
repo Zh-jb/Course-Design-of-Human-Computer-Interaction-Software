@@ -1,30 +1,36 @@
 段落 1
-长度：88
+长度：44
 内容：
-Python overview: Python is widely used in web development, scripting, and data analysis.
+Python 是一种解释型语言。python,pYthon,PYTHON,pyTHON.
 --------------------------------------------------
 
 段落 2
-长度：186
+长度：18
 内容：
-Function basics: In Python, a function can accept a parameter and return a value. You define a function with def, pass a parameter into the function, and use return to send a value back.
+它的语法简洁、易学，非常适合初学者。
 --------------------------------------------------
 
 段落 3
-长度：94
+长度：27
 内容：
-Loop basics: A loop repeats actions. A for loop and a while loop are basic control structures.
+列表（list）和字典（dict）是最常用的数据容器。
 --------------------------------------------------
 
 段落 4
-长度：97
+长度：40
 内容：
-JSONL notes: JSONL stores one JSON object per line. It is useful for saving structured text data.
+掌握基本的控制结构：if/elif/else, for循环，对后续编程非常重要。
 --------------------------------------------------
 
 段落 5
-长度：74
+长度：49
 内容：
-Data structures: Lists and dictionaries are common Python data structures.
+函数是 Python 的重要组成部分，通过函数可以封装代码，提高程序的复用性和可读性。PYTHON
+--------------------------------------------------
+
+段落 6
+长度：54
+内容：
+在学习 Python 的过程中，编写小程序练习逻辑思维和问题解决能力非常关键，例如计算数列和处理文本数据等。
 --------------------------------------------------
 
