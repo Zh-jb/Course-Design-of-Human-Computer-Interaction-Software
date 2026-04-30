@@ -327,6 +327,16 @@ def search_bm25(query, bm25_model, chunks, top_k=5):
     results.sort(key = lambda x:x["score"],reverse = True)
     return results[:top_k]
 
+def shorten_text(text, max_chars=200):
+    """
+    将文本截断为前 max_chars 个字符，超出部分加省略号。
+    """
+    text = text.strip()
+    if len(text) <= max_chars:
+        return text
+    return text[:max_chars] + "..."
+
 if __name__ == "__main__":
     print("===== CourseQA Core 测试 =====")
     print("\n===== 测试完成 =====")
+    

@@ -24,3 +24,6 @@ Use Count ,TF-IDF and BM-25 methods to achieve simple text retrieval.
 
 Week 8 Task:(2026-4-22):
 Learn to basically use FastAPI and uvicorn order.Tried to add some different URL path(Some of them contains Parameters).
+
+Week 9 Task:(2026-4-29):
+More complex functions to use FastAPI. 
